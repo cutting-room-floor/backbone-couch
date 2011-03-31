@@ -1,0 +1,11 @@
+{
+    "_id":"_design/base",
+    "language":"javascript",
+    "views":{
+        "byUrl": {
+            "map": "function(doc) {
+                emit(doc.url, doc._id);
+            }"
+        },
+    }
+}
