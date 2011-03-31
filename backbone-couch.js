@@ -6,16 +6,6 @@ var _ = require('underscore')._,
 module.exports = function(connection, dbName) {
     var db = connection.database(dbName);
 
-    // Helper function to get a URL from a Model or Collection as a property
-    // or as a function.
-    var getUrl = function(object) {
-        if (object.url instanceof Function) {
-            return object.url();
-        } else if (typeof object.url === 'string') {
-            return object.url;
-        }
-    };
-
     // Helper to push design docs.
     var pushDesignDocs = function(docs, callback) {
         var counter = 0;
@@ -57,11 +47,11 @@ module.exports = function(connection, dbName) {
         switch (method) {
         case 'read':
             if (model.id) {
-                db.view('base/byUrl', {key: getUrl(model)}, function(err, res) {
-                    (err || !res.length) ? error('No results') : success(res[0]);
+                db.view('base/byId', {key: model.id, include_docs: true}, function(err, res) {
+                    (err || !res.length) ? error('No results') : success(res[0].doc);
                 });
             } else {
-                db.all(model.query || {limit: 10}, function(err, res) {
+                db.all(model.query || {limit: 10, include_docs: true}, function(err, res) {
                     if (err || !res.length) return error('No results');
                     data = [];
                     _.each(res, function(val, key) {
@@ -73,16 +63,16 @@ module.exports = function(connection, dbName) {
             break;
         case 'create':
             db.save(model, function(err, res) {
-                if (err) return error(err);
-                model.attributes._id = res._id;
-                model.attributes._rev = res._rev;
+                if (err) return error(err.reason);
+                model.attributes._id = res.id;
+                model.attributes._rev = res.rev;
                 success({});
             });
             break;
         case 'update':
             db.save(model.attributes._id, model.attributes._rev, model, function(err, res) {
-                if (err) return error(err);
-                model.attributes._rev = res._rev;
+                if (err) return error(err.reason);
+                model.attributes._rev = res.rev;
                 success({});
             });
             break;

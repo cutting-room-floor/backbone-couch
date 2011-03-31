@@ -2,9 +2,9 @@
     "_id":"_design/base",
     "language":"javascript",
     "views":{
-        "byUrl": {
+        "byId": {
             "map": "function(doc) {
-                emit(doc.url, doc._id);
+                emit(doc.id, doc._id);
             }"
         },
     }
