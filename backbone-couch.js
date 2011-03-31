@@ -76,12 +76,14 @@ module.exports = function(connection, dbName) {
                 if (err) return error(err);
                 model.attributes._id = res._id;
                 model.attributes._rev = res._rev;
+                success({});
             });
             break;
         case 'update':
             db.save(model.attributes._id, model.attributes._rev, model, function(err, res) {
                 if (err) return error(err);
                 model.attributes._rev = res._rev;
+                success({});
             });
             break;
         case 'delete':
