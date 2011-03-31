@@ -1,19 +1,24 @@
-Backbone Stash
+Backbone Couch
 --------------
 Server-side overrides for Backbone to use couchdb for Model persistence.
 
 ### Compatibility
 
     documentcloud backbone 0.3.3
-    developmentseed stash 0.0.1
+    developmentseed cradle v0.2.0
 
 ### Usage
 
-Pass a database name to the stash directory (will be created if it doesn't exist
-yet) when calling `require()`.
-
     var Backbone = require('backbone');
-    Backbone.sync = require('backbone-couch')('documents').sync;
+        connection = new cradle.Connection();
+
+    // Create a new backbone-couch handler for a database 'documents'.
+    var couch = require('backbone-couch')(connection, 'documents');
+
+    // Create database, push default design documents to it and
+    // assign sync method to Backbone.
+    couch.install(function(err) {
+        Backbone.sync = couch('documents').sync;
+    });
 
     // Backbone.sync will now load and save models from a 'documents' couch db.
-
