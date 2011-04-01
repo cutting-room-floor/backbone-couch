@@ -6,6 +6,24 @@ var _ = require('underscore')._,
 module.exports = function(connection, dbName) {
     var db = connection.database(dbName);
 
+    // Helper function to get a URL from a Model or Collection as a property
+    // or as a function.
+    var getUrl = function(object) {
+        if (object.url instanceof Function) {
+            return object.url();
+        } else if (typeof object.url === 'string') {
+            return object.url;
+        }
+    };
+
+    // Prepare model for saving.
+    var prepare = function(model) {
+        var doc = model.toJSON();
+        if (doc.url) throw new Error('model.url is a reserved property');
+        doc.url = getUrl(model);
+        return doc;
+    }
+
     // Helper to push design docs.
     var pushDesignDocs = function(docs, callback) {
         var counter = 0;
@@ -47,11 +65,11 @@ module.exports = function(connection, dbName) {
         switch (method) {
         case 'read':
             if (model.id) {
-                db.view('base/byId', {key: model.id, include_docs: true}, function(err, res) {
+                db.view('base/byUrl', {key: getUrl(model), include_docs: true}, function(err, res) {
                     (err || !res.length) ? error('No results') : success(res[0].doc);
                 });
             } else {
-                db.view('base/byId', {limit: 10, include_docs: true}, function(err, res) {
+                db.view('base/byUrl', {limit: 10, include_docs: true}, function(err, res) {
                     if (err || !res.length) return error('No results');
                     data = [];
                     _.each(res, function(val, key) {
@@ -62,7 +80,7 @@ module.exports = function(connection, dbName) {
             }
             break;
         case 'create':
-            db.save(model, function(err, res) {
+            db.save(prepare(model), function(err, res) {
                 if (err) return error(err.reason);
                 model.attributes._id = res.id;
                 model.attributes._rev = res.rev;
@@ -70,7 +88,7 @@ module.exports = function(connection, dbName) {
             });
             break;
         case 'update':
-            db.save(model.attributes._id, model.attributes._rev, model, function(err, res) {
+            db.save(model.attributes._id, model.attributes._rev, prepare(model), function(err, res) {
                 if (err) return error(err.reason);
                 model.attributes._rev = res.rev;
                 success({});
