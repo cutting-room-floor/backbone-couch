@@ -62,7 +62,6 @@ module.exports = function(connection, dbName) {
         case 'read':
             if (model.id) {
                 db.get(urlEncode(getUrl(model)), function(err, doc) {
-                    console.log(doc);
                     err ? error('No results') : success(doc);
                 });
             } else {
@@ -93,9 +92,15 @@ module.exports = function(connection, dbName) {
             });
             break;
         case 'delete':
-            db.remove(urlEncode(getUrl(model)), model.attributes._rev, function(err, res) {
-                err ? error(err) : success(res);
-            })
+            // Fetch revision with a head request. This is not ideal,
+            // alternatives would require modifiying Backbone.sync() so that
+            // it sends the revision on a DELETE request.
+            var id = urlEncode(getUrl(model));
+            db.head(id, function (e, headers) {
+                db.remove(id, headers['etag'].slice(1, -1), function(err, res) {
+                    err ? error(err) : success(res);
+                })
+            });
             break;
         }
     };
