@@ -6,6 +6,6 @@
             "map": "function(doc) {
                 emit(doc.id, doc._id);
             }"
-        },
+        }
     }
 }
