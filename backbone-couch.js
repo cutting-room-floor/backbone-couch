@@ -55,7 +55,7 @@ module.exports = function(connection, dbName) {
                     if (err || !res.length) return error('No results');
                     data = [];
                     _.each(res, function(val, key) {
-                        data.push(val);
+                        data.push(val.doc);
                     });
                     success(data);
                 });
