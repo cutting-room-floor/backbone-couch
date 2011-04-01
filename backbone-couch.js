@@ -62,6 +62,7 @@ module.exports = function(connection, dbName) {
         case 'read':
             if (model.id) {
                 db.get(urlEncode(getUrl(model)), function(err, doc) {
+                    console.log(doc);
                     err ? error('No results') : success(doc);
                 });
             } else {
@@ -92,7 +93,7 @@ module.exports = function(connection, dbName) {
             });
             break;
         case 'delete':
-            db.remove(getUrl(model), model.attributes._rev, function(err, res) {
+            db.remove(urlEncode(getUrl(model)), model.attributes._rev, function(err, res) {
                 err ? error(err) : success(res);
             })
             break;
