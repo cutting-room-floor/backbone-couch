@@ -51,7 +51,7 @@ module.exports = function(connection, dbName) {
                     (err || !res.length) ? error('No results') : success(res[0].doc);
                 });
             } else {
-                db.all(model.query || {limit: 10, include_docs: true}, function(err, res) {
+                db.view('base/byId', {limit: 10, include_docs: true}, function(err, res) {
                     if (err || !res.length) return error('No results');
                     data = [];
                     _.each(res, function(val, key) {
