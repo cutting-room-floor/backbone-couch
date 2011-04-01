@@ -16,6 +16,10 @@ module.exports = function(connection, dbName) {
         }
     };
 
+    var urlEncode = function(url) {
+        return escape(url).replace(/\//g, '%2F');
+    };
+
     // Helper to push design docs.
     var pushDesignDocs = function(docs, callback) {
         var counter = 0;
@@ -57,11 +61,11 @@ module.exports = function(connection, dbName) {
         switch (method) {
         case 'read':
             if (model.id) {
-                db.view('base/byUrl', {key: getUrl(model), include_docs: true}, function(err, res) {
-                    (err || !res.length) ? error('No results') : success(res[0].doc);
+                db.get(urlEncode(getUrl(model)), function(err, doc) {
+                    err ? error('No results') : success(doc);
                 });
             } else {
-                db.view('base/byUrl', {limit: 10, include_docs: true}, function(err, res) {
+                db.view('base/all', {limit: 10, include_docs: true}, function(err, res) {
                     if (err || !res.length) return error('No results');
                     data = [];
                     _.each(res, function(val, key) {
@@ -72,22 +76,23 @@ module.exports = function(connection, dbName) {
             }
             break;
         case 'create':
-            db.save(model.toJSON(), function(err, res) {
+            doc = model.toJSON();
+            doc._id = getUrl(model);
+            db.post(doc, function(err, res) {
                 if (err) return error(err.reason);
-                model.attributes._id = res.id;
                 model.attributes._rev = res.rev;
                 success({});
             });
             break;
         case 'update':
-            db.save(model.attributes._id, model.attributes._rev, model.toJSON(), function(err, res) {
+            db.save(urlEncode(getUrl(model)), model.attributes._rev, model.toJSON(), function(err, res) {
                 if (err) return error(err.reason);
                 model.attributes._rev = res.rev;
                 success({});
             });
             break;
         case 'delete':
-            db.remove(model.attributes._id, model.attributes._rev, function(err, res) {
+            db.remove(getUrl(model), model.attributes._rev, function(err, res) {
                 err ? error(err) : success(res);
             })
             break;
