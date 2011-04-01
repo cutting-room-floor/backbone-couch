@@ -16,14 +16,6 @@ module.exports = function(connection, dbName) {
         }
     };
 
-    // Prepare model for saving.
-    var prepare = function(model) {
-        var doc = model.toJSON();
-        if (doc.url) throw new Error('model.url is a reserved property');
-        doc.url = getUrl(model);
-        return doc;
-    }
-
     // Helper to push design docs.
     var pushDesignDocs = function(docs, callback) {
         var counter = 0;
@@ -80,7 +72,7 @@ module.exports = function(connection, dbName) {
             }
             break;
         case 'create':
-            db.save(prepare(model), function(err, res) {
+            db.save(model.toJSON(), function(err, res) {
                 if (err) return error(err.reason);
                 model.attributes._id = res.id;
                 model.attributes._rev = res.rev;
@@ -88,7 +80,7 @@ module.exports = function(connection, dbName) {
             });
             break;
         case 'update':
-            db.save(model.attributes._id, model.attributes._rev, prepare(model), function(err, res) {
+            db.save(model.attributes._id, model.attributes._rev, model.toJSON(), function(err, res) {
                 if (err) return error(err.reason);
                 model.attributes._rev = res.rev;
                 success({});
