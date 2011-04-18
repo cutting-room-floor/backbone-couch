@@ -1,0 +1,21 @@
+{
+  "author": "",
+  "name": "backbone-couch",
+  "description": "Backbone.js sync for CouchD",
+  "version": "0.0.1",
+  "homepage": "https://github.com/developmentseed/backbone-couch",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/developmentseed/backbone-couch.git"
+  },
+  "directories": {
+    "lib": "."
+  },
+  "engines": {
+    "node": "*"
+  },
+  "dependencies": {
+    "cradle": "https://github.com/developmentseed/cradle/tarball/v0.2.0"
+  },
+  "devDependencies": {}
+}
