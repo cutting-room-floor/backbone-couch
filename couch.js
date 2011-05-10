@@ -37,12 +37,13 @@ Couch.prototype.del = function(id, callback) {
 
 Couch.prototype.get = function(id, callback) {
     request.get({
-        uri: this.uri + '/' + encodeURIComponent(doc._id)
-    }, function(err, res) {
-        // doc._rev = res.headers['etag'].slice(1, -1);
-        console.log(res);
-        // todo!!
-        callback && callback(err, res);
+        uri: this.uri + '/' + encodeURIComponent(id)
+    }, function(err, res, body) {
+        if (!err) {
+            body = JSON.parse(body);
+            err = body.error ? (body.error + ': ' + body.reason) : null;
+        }
+        callback && callback(err, body);
     });
 };
 
