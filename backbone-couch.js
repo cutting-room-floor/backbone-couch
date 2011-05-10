@@ -1,10 +1,11 @@
 // Provides a `Backbone.sync` or `Model.sync` method for the server-side
 // context. Uses CouchDB for model persistence.
 var _ = require('underscore')._,
-    Backbone = require('backbone');
+    Backbone = require('backbone'),
+    Couch = require('./couch');
 
-module.exports = function(connection, dbName) {
-    var db = connection.database(dbName);
+module.exports = function(config) {
+    var db = new Couch(config);
 
     // Helper function to get a URL from a Model or Collection as a property
     // or as a function.
@@ -16,37 +17,20 @@ module.exports = function(connection, dbName) {
         }
     };
 
-    var urlEncode = function(url) {
-        return escape(url).replace(/\//g, '%2F');
-    };
-
     // Helper to push design docs.
     var pushDesignDocs = function(docs, callback) {
         var counter = 0;
         docs.forEach(function(doc) {
             require('fs').readFile(doc.file, function(err, data) {
-                var headers = {
-                    'Content-Length': data.length,
-                    'Content-Type': 'application/json'
-                };
-                connection.rawRequest('PUT', db.name + '/' + doc.id, null, data, headers)
-                .on('response', function(res) {
-                    counter++;
-                    if (res.statusCode != 201) {
-                        callback('Failed to push document');
-                    }
-                    else if (counter == docs.length) {
-                        callback(err);
-                    }
-                });
+                db.put(data, callback);
             });
         });
     };
 
     // Set up database, populate with design documents.
     var install = function(callback) {
-        db.destroy(function() {
-            db.create(function(err) {
+        db.dbDel(function() {
+            db.dbPut(function(err) {
                 err && callback(err);
                 pushDesignDocs([{
                     id: '_design/base',
@@ -56,12 +40,19 @@ module.exports = function(connection, dbName) {
         });
     };
 
+    // Prepare model for saving / deleting.
+    var toJSON = function(model){
+        var doc = model.toJSON();
+        doc._id = getUrl(model);
+        return doc;
+    }
+
     // Backbone sync method.
     var sync = function(method, model, success, error) {
         switch (method) {
         case 'read':
             if (model.id) {
-                db.get(urlEncode(getUrl(model)), function(err, doc) {
+                db.get(getUrl(model), function(err, doc) {
                     err ? error('No results') : success(doc);
                 });
             } else {
@@ -76,31 +67,21 @@ module.exports = function(connection, dbName) {
             }
             break;
         case 'create':
-            doc = model.toJSON();
-            doc._id = getUrl(model);
-            db.post(doc, function(err, res) {
+            db.put(toJSON(model), function(err, res) {
                 if (err) return error(err.reason);
-                model.attributes._rev = res.rev;
-                success({});
+                success({'_rev': res.rev});
             });
             break;
         case 'update':
-            db.save(urlEncode(getUrl(model)), model.attributes._rev, model.toJSON(), function(err, res) {
+            db.post(toJSON(model), function(err, res) {
                 if (err) return error(err.reason);
-                model.attributes._rev = res.rev;
-                success({});
+                success({'_rev': res.rev});
             });
             break;
         case 'delete':
-            // Fetch revision with a head request. This is not ideal,
-            // alternatives would require modifiying Backbone.sync() so that
-            // it sends the revision on a DELETE request.
-            var id = urlEncode(getUrl(model));
-            db.head(id, function (e, headers) {
-                db.remove(id, headers['etag'].slice(1, -1), function(err, res) {
-                    err ? error(err) : success(res);
-                })
-            });
+            db.del(toJSON(model), headers['etag'].slice(1, -1), function(err, res) {
+                err ? error(err) : success(res);
+            })
             break;
         }
     };

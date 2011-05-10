@@ -15,7 +15,7 @@
     "node": "*"
   },
   "dependencies": {
-    "cradle": "https://github.com/developmentseed/cradle/tarball/v0.2.0",
+    "request": "https://github.com/mikeal/request/tarball/8bb7f98ba8b78c217552c979811c07f1299318fe",
     "backbone": "= 0.3.3"
   },
   "devDependencies": {}
