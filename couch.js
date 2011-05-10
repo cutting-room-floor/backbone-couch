@@ -5,26 +5,36 @@ Couch = module.exports = function(config) {
         config.host + ':' +
         config.port + '/' +
         config.name;
-}
+};
+
+Couch.prototype.parse = function(callback) {
+    return function(err, res, body) {
+        if (!err && body) {
+            body = JSON.parse(body);
+            if (body.error) {
+                err = body.error + ': ' + body.reason;
+                console.log(err);
+            } else if (res.headers['etag']) {
+                // TODO: this will break if return value is an array.
+                body._rev = res.headers['etag'].slice(1, -1);
+            }
+        }
+        callback(err, body);
+    }
+};
 
 Couch.prototype.put = function(doc, callback) {
     request.put({
         uri: this.uri + '/' + encodeURIComponent(doc._id),
         json: doc
-    }, function(err, res) {
-        doc._rev = res.headers['etag'].slice(1, -1);
-        callback && callback(err, doc);
-    });
+    }, this.parse(callback));
 };
 
 Couch.prototype.post = function(doc, callback) {
     request.post({
-        uri: this.uri + '/' + encodeURIComponent(doc._id),
+        uri: this.uri,
         json: doc
-    }, function(err, res) {
-        doc._rev = res.headers['etag'].slice(1, -1);
-        callback && callback(err, doc);
-    });
+    }, this.parse(callback));
 };
 
 Couch.prototype.del = function(id, callback) {
@@ -38,13 +48,7 @@ Couch.prototype.del = function(id, callback) {
 Couch.prototype.get = function(id, callback) {
     request.get({
         uri: this.uri + '/' + encodeURIComponent(id)
-    }, function(err, res, body) {
-        if (!err) {
-            body = JSON.parse(body);
-            err = body.error ? (body.error + ': ' + body.reason) : null;
-        }
-        callback && callback(err, body);
-    });
+    }, this.parse(callback));
 };
 
 Couch.prototype.view = function(view, options, callback) {
@@ -55,7 +59,6 @@ Couch.prototype.view = function(view, options, callback) {
     request.get({
         uri: this.uri + '/_view/' + view + '/?' + opts.join('&')
     }, function(err, res) {
-        // doc._rev = res.headers['etag'].slice(1, -1);
         console.log(res);
         // todo!!
         callback && callback(err, res);

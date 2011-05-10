@@ -60,7 +60,7 @@ module.exports = function(config) {
             });
             break;
         case 'update':
-            db.post(toJSON(model), function(err, res) {
+            db.put(toJSON(model), function(err, res) {
                 if (err) return error(err.reason);
                 success({'_rev': res.rev});
             });
