@@ -17,25 +17,12 @@ module.exports = function(config) {
         }
     };
 
-    // Helper to push design docs.
-    var pushDesignDocs = function(docs, callback) {
-        var counter = 0;
-        docs.forEach(function(doc) {
-            require('fs').readFile(doc.file, function(err, data) {
-                db.put(data, callback);
-            });
-        });
-    };
-
     // Set up database, populate with design documents.
     var install = function(callback) {
         db.dbDel(function() {
             db.dbPut(function(err) {
                 err && callback(err);
-                pushDesignDocs([{
-                    id: '_design/base',
-                    file: __dirname + '/base.json'
-                }], callback);
+                db.putDesignDocs([__dirname + '/base.json'], callback);
             })
         });
     };
@@ -89,7 +76,6 @@ module.exports = function(config) {
     return {
         db: db,
         install: install,
-        pushDesignDocs: pushDesignDocs,
         sync: sync
     };
 };
