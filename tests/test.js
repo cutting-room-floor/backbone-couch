@@ -78,6 +78,7 @@ exports['save'] = function() {
 exports['view'] = function() {
     var couch = require('backbone-couch')({name: 'backbone_couch_test_view'});
     var db = couch.db;
+    // Exend TestNumber to not interfere with concurrently running save test.
     var ViewNumber = TestNumber.extend({});
     var ViewNumbers = TestNumbers.extend({
         model: ViewNumber
