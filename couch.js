@@ -11,6 +11,8 @@ Couch = module.exports = function(config) {
         config.name;
 };
 
+// General response parser
+// -----------------------
 Couch.prototype.parse = function(callback) {
     return function(err, res, body) {
         if (!err && body) {
@@ -18,7 +20,6 @@ Couch.prototype.parse = function(callback) {
             if (body.error) {
                 err = body.error + ': ' + body.reason;
             } else if (res.headers['etag']) {
-                // TODO: this will break if return value is an array.
                 body._rev = res.headers['etag'].slice(1, -1);
             }
         }
@@ -26,6 +27,8 @@ Couch.prototype.parse = function(callback) {
     }
 };
 
+// PUT a document to Couch
+// -----------------------
 Couch.prototype.put = function(doc, callback) {
     request.put({
         uri: this.uri + '/' + encodeURIComponent(doc._id),
@@ -33,6 +36,8 @@ Couch.prototype.put = function(doc, callback) {
     }, this.parse(callback));
 };
 
+// POST a document to Couch
+// ------------------------
 Couch.prototype.post = function(doc, callback) {
     request.post({
         uri: this.uri,
@@ -40,6 +45,8 @@ Couch.prototype.post = function(doc, callback) {
     }, this.parse(callback));
 };
 
+// DELETE a document from Couch
+// ----------------------------
 Couch.prototype.del = function(doc, callback) {
     request.del({
         uri: this.uri + '/' + encodeURIComponent(doc._id) + '?_rev=' + doc._rev
@@ -48,12 +55,16 @@ Couch.prototype.del = function(doc, callback) {
     });
 };
 
+// GET a document from Couch
+// -------------------------
 Couch.prototype.get = function(id, callback) {
     request.get({
         uri: this.uri + '/' + encodeURIComponent(id)
     }, this.parse(callback));
 };
 
+// GET documents via view from Couch
+// ---------------------------------
 Couch.prototype.view = function(view, options, callback) {
     var opts = [];
     _.each(options, function(v, k) {
@@ -64,6 +75,8 @@ Couch.prototype.view = function(view, options, callback) {
     }, this.parse(callback));
 };
 
+// Create database
+// ---------------
 Couch.prototype.dbPut = function(callback) {
     request.put({
         uri: this.uri
@@ -72,6 +85,8 @@ Couch.prototype.dbPut = function(callback) {
     });
 };
 
+// Delete database
+// ---------------
 Couch.prototype.dbDel = function(callback) {
     request.del({
         uri: this.uri
@@ -80,7 +95,8 @@ Couch.prototype.dbDel = function(callback) {
     });
 };
 
-// Helper to put design docs from file.
+// PUT design docs from file  
+// -------------------------
 Couch.prototype.putDesignDocs = function(files, callback) {
     var counter = 0;
     var that = this;
