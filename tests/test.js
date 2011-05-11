@@ -21,13 +21,14 @@ exports['install'] = function() {
 };
 
 exports['save'] = function() {
-    var couch = require('backbone-couch')({name: 'backbone_couch_test_put'});
+    var couch = require('backbone-couch')({name: 'backbone_couch_test_save'});
     var db = couch.db;
     Number.prototype.sync = couch.sync;
     couch.install(function(err) {
         var models = [];
         var destroyed = 0;
         var destroy = function(model) {
+            assert.isDefined(model.get('_rev'));
             model.destroy();
             destroyed++;
             if (destroyed == data.length) {
@@ -37,10 +38,7 @@ exports['save'] = function() {
         _.each(data, function(d) {
             models.push((new Number()).save(d, {
                 success: destroy,
-                error: function(model) {
-                    console.error('Error saving model');
-                    destroy(model);
-                }
+                error: destroy
             }));
         });
     });
