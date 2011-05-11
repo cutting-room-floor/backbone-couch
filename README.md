@@ -1,6 +1,9 @@
 Backbone Couch
 --------------
-Server-side overrides for Backbone to use couchdb for Model persistence.
+Overrides for [Backbone](http://documentcloud.github.com/backbone/) to use
+[CouchDB](http://couchdb.apache.org/) for Model persistence. Intended for
+server-side use of Backbone like in
+[Bones](https://github.com/developmentseed/bones).
 
 ### Compatibility
 
