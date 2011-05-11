@@ -25,3 +25,10 @@ Server-side overrides for Backbone to use couchdb for Model persistence.
     });
 
     // Backbone.sync will now load and save models from a 'documents' couch db.
+
+### Run tests
+
+Requires [Expresso](http://visionmedia.github.com/expresso/). Tested with version 0.7.6.
+
+    cd tests
+    expresso test.js
