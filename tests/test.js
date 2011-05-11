@@ -2,6 +2,8 @@ var assert = require('assert'),
     Backbone = require('backbone'),
     _ = require('underscore');
 
+// Install and destroy database.
+// -----------------------------
 exports['install'] = function() {
     var couch = require('backbone-couch')({name: 'backbone_couch_test_install'});
     var db = couch.db;
@@ -20,6 +22,8 @@ exports['install'] = function() {
     });
 };
 
+// Create db, save documents, load documents, destroy documents, destroy db.
+// -------------------------------------------------------------------------
 exports['save'] = function() {
     var couch = require('backbone-couch')({name: 'backbone_couch_test_save'});
     var db = couch.db;
@@ -28,17 +32,31 @@ exports['save'] = function() {
         var models = [];
         var destroyed = 0;
         var destroy = function(model) {
+            model.destroy(function() {
+                destroyed++;
+                if (destroyed == data.length) {
+                    couch.db.dbDel();
+                }
+            });
+        };
+        var reload = function(model) {
             assert.isDefined(model.get('_rev'));
-            model.destroy();
-            destroyed++;
-            if (destroyed == data.length) {
-                couch.db.dbDel();
-            }
+            var rev = model.get('_rev');
+            (new Number({id: model.id})).fetch({
+                success: function(model) {
+                    assert.eql(model.get('_rev'), rev);
+                    destroy(model);
+                },
+                error: function(model) {
+                    console.error('Error fetching model');
+                    destroy(model);
+                }
+            });
         };
         _.each(data, function(d) {
             models.push((new Number()).save(d, {
-                success: destroy,
-                error: destroy
+                success: reload,
+                error: reload
             }));
         });
     });
