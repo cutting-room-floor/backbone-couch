@@ -18,7 +18,8 @@ Couch.prototype.parse = function(callback) {
         if (!err && body) {
             body = JSON.parse(body);
             if (body.error) {
-                err = body.error + ': ' + body.reason;
+                err = new Error(body.reason);
+                err.code = body.error;
             } else if (res.headers['etag']) {
                 body._rev = res.headers['etag'].slice(1, -1);
             }

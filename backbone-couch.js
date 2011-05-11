@@ -47,7 +47,7 @@ module.exports = function(config) {
                     limit: 10,
                     include_docs: true
                 }, function(err, res) {
-                    if (err || !res.rows.length) return error('No results');
+                    if (err) return error(err);
                     data = [];
                     _.each(res.rows, function(val) {
                         data.push(val.doc);
@@ -58,13 +58,13 @@ module.exports = function(config) {
             break;
         case 'create':
             db.put(toJSON(model), function(err, res) {
-                if (err) return error(err.reason);
+                if (err) return error(err);
                 success({'_rev': res.rev});
             });
             break;
         case 'update':
             db.put(toJSON(model), function(err, res) {
-                if (err) return error(err.reason);
+                if (err) return error(err);
                 success({'_rev': res.rev});
             });
             break;
