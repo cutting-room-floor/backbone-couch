@@ -1,9 +1,12 @@
 var request = require('request');
 
 Couch = module.exports = function(config) {
+    var host = config.host || '127.0.0.1';
+    var port = config.port || '5984';
+    if (!config.name) throw 'Database name is required';
     this.uri = 'http://' +
-        config.host + ':' +
-        config.port + '/' +
+        host + ':' +
+        port + '/' +
         config.name;
 };
 
@@ -13,7 +16,6 @@ Couch.prototype.parse = function(callback) {
             body = JSON.parse(body);
             if (body.error) {
                 err = body.error + ': ' + body.reason;
-                console.log(err);
             } else if (res.headers['etag']) {
                 // TODO: this will break if return value is an array.
                 body._rev = res.headers['etag'].slice(1, -1);
@@ -37,7 +39,7 @@ Couch.prototype.post = function(doc, callback) {
     }, this.parse(callback));
 };
 
-Couch.prototype.del = function(id, callback) {
+Couch.prototype.del = function(doc, callback) {
     request.del({
         uri: this.uri + '/' + encodeURIComponent(doc._id) + '?_rev=' + doc._rev
     }, function(err, res) {

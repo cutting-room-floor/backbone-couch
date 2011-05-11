@@ -21,7 +21,7 @@ module.exports = function(config) {
     var install = function(callback) {
         db.dbDel(function() {
             db.dbPut(function(err) {
-                err && callback(err);
+                if (err) return callback(err);
                 db.putDesignDocs([__dirname + '/base.json'], callback);
             })
         });
@@ -66,7 +66,7 @@ module.exports = function(config) {
             });
             break;
         case 'delete':
-            db.del(toJSON(model), headers['etag'].slice(1, -1), function(err, res) {
+            db.del(toJSON(model), function(err, res) {
                 err ? error(err) : success(res);
             })
             break;
