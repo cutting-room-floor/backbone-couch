@@ -1,4 +1,5 @@
-var request = require('request');
+var _ = require('underscore')._,
+    request = require('request');
 
 Couch = module.exports = function(config) {
     var host = config.host || '127.0.0.1';
@@ -55,16 +56,12 @@ Couch.prototype.get = function(id, callback) {
 
 Couch.prototype.view = function(view, options, callback) {
     var opts = [];
-    _.each(options, function(k, v) {
+    _.each(options, function(v, k) {
         opts.push(encodeURIComponent(k) + '=' + encodeURIComponent(v));
     });
     request.get({
-        uri: this.uri + '/_view/' + view + '/?' + opts.join('&')
-    }, function(err, res) {
-        console.log(res);
-        // todo!!
-        callback && callback(err, res);
-    });
+        uri: this.uri + '/' + view + '/?' + opts.join('&')
+    }, this.parse(callback));
 };
 
 Couch.prototype.dbPut = function(callback) {

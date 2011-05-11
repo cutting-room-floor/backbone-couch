@@ -43,10 +43,13 @@ module.exports = function(config) {
                     err ? error('No results') : success(doc);
                 });
             } else {
-                db.view('base/all', {limit: 10, include_docs: true}, function(err, res) {
-                    if (err || !res.length) return error('No results');
+                db.view('_design/base/_view/all', {
+                    limit: 10,
+                    include_docs: true
+                }, function(err, res) {
+                    if (err || !res.rows.length) return error('No results');
                     data = [];
-                    _.each(res, function(val, key) {
+                    _.each(res.rows, function(val) {
                         data.push(val.doc);
                     });
                     success(data);
