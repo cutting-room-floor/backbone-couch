@@ -16,7 +16,8 @@
   },
   "dependencies": {
     "request": "https://github.com/mikeal/request/tarball/8bb7f98ba8b78c217552c979811c07f1299318fe",
-    "backbone": "= 0.3.3"
+    "backbone": "= 0.3.3",
+    "underscore": "= 1.1.5"
   },
   "devDependencies": {}
 }
