@@ -82,8 +82,8 @@ exports['view'] = function() {
     var ViewNumbers = TestNumbers.extend({
         model: ViewNumber
     });
-    TestNumber.prototype.sync = couch.sync;
-    TestNumbers.prototype.sync = couch.sync;
+    ViewNumber.prototype.sync = couch.sync;
+    ViewNumbers.prototype.sync = couch.sync;
     couch.install(function(err) {
         var models = [];
         var saved = 0;
