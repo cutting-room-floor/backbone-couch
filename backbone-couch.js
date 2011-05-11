@@ -19,7 +19,8 @@ module.exports = function(config) {
 
     // Set up database, populate with design documents.
     var install = function(callback) {
-        db.dbDel(function() {
+        db.dbDel(function(err) {
+            if (err && err.reason != 'missing') return callback(err);
             db.dbPut(function(err) {
                 if (err) return callback(err);
                 db.putDesignDocs([__dirname + '/base.json'], callback);

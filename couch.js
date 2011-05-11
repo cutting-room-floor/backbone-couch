@@ -18,13 +18,15 @@ Couch.prototype.parse = function(callback) {
         if (!err && body) {
             body = JSON.parse(body);
             if (body.error) {
-                err = new Error(body.reason);
+                err = new Error(res.statusCode + ' - '+ body.reason);
                 err.code = body.error;
+                err.reason = body.reason;
+                err.statusCode = res.statusCode;
             } else if (res.headers['etag']) {
                 body._rev = res.headers['etag'].slice(1, -1);
             }
         }
-        callback(err, body);
+        callback && callback(err, body);
     }
 };
 
@@ -81,9 +83,7 @@ Couch.prototype.view = function(view, options, callback) {
 Couch.prototype.dbPut = function(callback) {
     request.put({
         uri: this.uri
-    }, function(err, res) {
-        callback && callback(err, res);
-    });
+    }, this.parse(callback));
 };
 
 // Delete database
@@ -91,9 +91,7 @@ Couch.prototype.dbPut = function(callback) {
 Couch.prototype.dbDel = function(callback) {
     request.del({
         uri: this.uri
-    }, function(err, res) {
-        callback && callback(err, res);
-    });
+    }, this.parse(callback));
 };
 
 // PUT design docs from file  
