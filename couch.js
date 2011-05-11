@@ -9,17 +9,21 @@ Couch = module.exports = function(config) {
         host + ':' +
         port + '/' +
         config.name;
+    this.name = config.name;
 };
 
 // General response parser
 // -----------------------
 Couch.prototype.parse = function(callback) {
+    var that = this;
     return function(err, res, body) {
         if (!err && body) {
             body = JSON.parse(body);
             if (body.error) {
-                err = new Error(res.statusCode + ' - '+ body.reason);
-                err.code = body.error;
+                err = new Error(that.name +
+                    ': ' + body.reason +
+                    ' (' + res.statusCode + ')');
+                err.error = body.error;
                 err.reason = body.reason;
                 err.statusCode = res.statusCode;
             } else if (res.headers['etag']) {

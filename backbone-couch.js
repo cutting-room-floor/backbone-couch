@@ -18,13 +18,20 @@ module.exports = function(config) {
     };
 
     // Set up database, populate with design documents.
+    // There is a delay of 100ms between deleting / creating. This was
+    // added to avoid sporadic 412 'DB exists' fails when re-creating existing
+    // DBs.
+    // TODO: 1) find out why delay is necessary. 2) make install() only install
+    // and have API users explicitly destroy a DB before installing it.
     var install = function(callback) {
         db.dbDel(function(err) {
             if (err && err.reason != 'missing') return callback(err);
-            db.dbPut(function(err) {
-                if (err) return callback(err);
-                db.putDesignDocs([__dirname + '/base.json'], callback);
-            })
+            setTimeout(function() {
+                db.dbPut(function(err) {
+                    if (err) return callback(err);
+                    db.putDesignDocs([__dirname + '/base.json'], callback);
+                });
+            }, 100);
         });
     };
 
