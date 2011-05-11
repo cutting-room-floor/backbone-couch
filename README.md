@@ -33,5 +33,6 @@ server-side use of Backbone like in
 
 Requires [Expresso](http://visionmedia.github.com/expresso/). Tested with version 0.7.6.
 
-    cd tests
-    expresso test.js
+    cd backbone-couch/
+    npm test
+
