@@ -57,9 +57,7 @@ Couch.prototype.post = function(doc, callback) {
 Couch.prototype.del = function(doc, callback) {
     request.del({
         uri: this.uri + '/' + encodeURIComponent(doc._id) + '?_rev=' + doc._rev
-    }, function(err, res) {
-        callback && callback(err);
-    });
+    }, this.parse(callback));
 };
 
 // GET a document from Couch
