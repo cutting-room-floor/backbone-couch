@@ -56,7 +56,7 @@ Couch.prototype.post = function(doc, callback) {
 // ----------------------------
 Couch.prototype.del = function(doc, callback) {
     request.del({
-        uri: this.uri + '/' + encodeURIComponent(doc._id) + '?_rev=' + doc._rev
+        uri: this.uri + '/' + encodeURIComponent(doc._id) + '?rev=' + doc._rev
     }, this.parse(callback));
 };
 
