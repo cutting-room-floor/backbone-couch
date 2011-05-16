@@ -36,7 +36,7 @@ module.exports = function(config) {
     };
 
     // Prepare model for saving / deleting.
-    var toJSON = function(model){
+    var toJSON = function(model) {
         var doc = model.toJSON();
         doc._id = getUrl(model);
         return doc;
