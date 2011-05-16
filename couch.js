@@ -17,8 +17,8 @@ Couch = module.exports = function(config) {
 Couch.prototype.parse = function(callback) {
     var that = this;
     return function(err, res, body) {
-        if (!err && body) {
-            body = JSON.parse(body);
+        body = body ? JSON.parse(body) : {};
+        if (!err) {
             if (body.error) {
                 err = new Error(that.name +
                     ': ' + body.reason +
@@ -66,6 +66,17 @@ Couch.prototype.get = function(id, callback) {
     request.get({
         uri: this.uri + '/' + encodeURIComponent(id)
     }, this.parse(callback));
+};
+
+// HEAD request to retrieve document _rev.
+// ---------------------------------------
+Couch.prototype.head = function(id, callback) {
+    request.head({
+        uri: this.uri + '/' + encodeURIComponent(id)
+    }, this.parse(function(err, body) {
+        body && !err && (body._id = id);
+        callback(err, body);
+    }));
 };
 
 // GET documents via view from Couch

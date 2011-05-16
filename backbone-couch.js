@@ -77,9 +77,18 @@ module.exports = function(config) {
             });
             break;
         case 'delete':
-            db.del(toJSON(model), function(err, res) {
-                err ? error(err) : success(res);
-            })
+            // TODO: backbone.js does not have provisions for passing on the
+            // body of a DELETE request. Passing the revision through the 
+            // DELETE request's URL would require additional set up work in
+            // models. We take a short cut and retrieve the document's revision
+            // with a HEAD request to CouchDB.
+            db.head(getUrl(model), function(err, doc) {
+                if (err) return error(err);
+                model.set({'_rev': doc._rev}, {silent: true});
+                db.del(toJSON(model), function(err, res) {
+                    err ? error(err) : success(res);
+                })
+            });
             break;
         }
     };
