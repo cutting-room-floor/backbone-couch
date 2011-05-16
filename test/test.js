@@ -26,7 +26,7 @@ exports['install'] = function() {
             db.dbDel(function(err, res) {
                 assert.isNull(err);
                 db.get('_design/base', function(err, doc) {
-                    assert.eql(err.code, 'not_found');
+                    assert.eql(err.error, 'not_found');
                 });
             });
         })
