@@ -20,9 +20,7 @@ Couch.prototype.parse = function(callback) {
         body = body ? JSON.parse(body) : {};
         if (!err) {
             if (body.error) {
-                err = new Error(that.name +
-                    ': ' + body.reason +
-                    ' (' + res.statusCode + ')');
+                err = new Error(body.reason);
                 err.error = body.error;
                 err.reason = body.reason;
                 err.statusCode = res.statusCode;
