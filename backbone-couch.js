@@ -48,7 +48,7 @@ module.exports = function(config) {
         case 'read':
             if (model.id) {
                 db.get(getUrl(model), function(err, doc) {
-                    err ? error('No results') : success(doc);
+                    err ? error(new Error('No results')) : success(doc);
                 });
             } else {
                 db.view('_design/base/_view/all', {
