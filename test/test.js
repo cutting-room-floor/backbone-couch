@@ -114,6 +114,62 @@ exports['view'] = function() {
     });
 };
 
+
+// Test custom design docs
+// -----------------------
+exports['custom'] = function() {
+    var couch = require('backbone-couch')({name: 'backbone_couch_test_custom'});
+    var db = couch.db;
+    var ViewNumber = TestNumber.extend({});
+    var ViewNumbers = TestNumbers.extend({
+        model: ViewNumber
+    });
+    ViewNumber.prototype.sync = couch.sync;
+    ViewNumbers.prototype.sync = couch.sync;
+    couch.install({ doc: {
+        "_id":"_design/backbone",
+        "language":"javascript",
+        "views": {
+            "custom": {
+                "map": "function(doc) { emit(doc._id, doc._id); }"
+            }
+        },
+        "rewrites": [
+            {
+                "from": "/api/Number",
+                "to": "_view/custom",
+                "query": {
+                    "limit": 2,
+                    "descending": true,
+                    "include_docs": true
+                }
+            }
+        ]
+    }}, function(err) {
+        assert.isNull(err);
+        var remaining = data.length;
+        var view = function() {
+            remaining--;
+            if (remaining) return;
+            (new ViewNumbers()).fetch({
+                success: function(collection) {
+                    assert.equal(collection.length, 2);
+                    assert.equal(collection.at(0).id, 'two');
+                    assert.equal(collection.at(1).id, 'three');
+                    db.dbDel();
+                },
+                error: error(db)
+            });
+        };
+        data.forEach(function(d) {
+            (new ViewNumber()).save(d, {
+                success: view,
+                error: error(db)
+            });
+        });
+    });
+};
+
 var TestNumber = Backbone.Model.extend({
     url: function() {
         return '/api/Number/' + this.id;
