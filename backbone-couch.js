@@ -29,7 +29,7 @@ module.exports = function(config) {
             options = {};
         }
         options = _(options || {}).defaults({
-            doc: __dirname + '/base.json'
+            doc: __dirname + '/backbone.json'
         });
         db.dbDel(function(err) {
             if (err && err.reason != 'missing') return callback(err);
