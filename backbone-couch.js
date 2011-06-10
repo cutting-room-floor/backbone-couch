@@ -76,9 +76,14 @@ module.exports = function(config) {
             });
             break;
         case 'update':
-            db.put(toJSON(model), function(err, res) {
-                if (err) return error(err);
-                success({'_rev': res.rev});
+            // Ensure that partial updates work by retrieving the model
+            // and merging its attributes.
+            db.get(getUrl(model), function(err, doc) {
+                if (err) doc = {};
+                db.put(_(doc).extend(toJSON(model)), function(err, res) {
+                    if (err) return error(err);
+                    success({'_rev': res.rev});
+                });
             });
             break;
         case 'delete':
