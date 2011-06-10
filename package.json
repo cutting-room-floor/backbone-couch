@@ -2,9 +2,9 @@
     "name": "backbone-couch",
     "description": "Backbone.js sync for CouchDB",
     "author": {
-      "name": "Development Seed",
-      "url": "http://developmentseed.org/",
-      "email": "info@developmentseed.org"
+        "name": "Development Seed",
+        "url": "http://developmentseed.org/",
+        "email": "info@developmentseed.org"
     },
     "version": "0.3.0",
     "homepage": "https://github.com/developmentseed/backbone-couch",
