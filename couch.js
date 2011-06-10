@@ -1,4 +1,5 @@
-var _ = require('underscore')._,
+var _ = require('underscore'),
+    fs = require('fs'),
     request = require('request');
 
 Couch = module.exports = function(config) {
@@ -105,20 +106,34 @@ Couch.prototype.dbDel = function(callback) {
     }, this.parse(callback));
 };
 
-// PUT design docs from file  
-// -------------------------
+// PUT design docs from files or JSON objects
+// ------------------------------------------
 Couch.prototype.putDesignDocs = function(files, callback) {
-    var counter = 0;
-    var that = this;
-    files.forEach(function(file) {
-        require('fs').readFile(file, function(err, data) {
-            var id = data.toString().match(/.*"_id".*?:.*?"(.*?)".*/)[1];
-            request.put({
-                uri: that.uri + '/' + id,
-                body: data.toString()
-            }, function(err, res) {
-                callback && callback(err, res);
-            });
+    callback = callback || function() {};
+
+    var remaining = files.length;
+    var put = function(id, doc) {
+        if (!id) return callback(new Error('Document _id required.'));
+        doc = _(doc).isString() ? doc : JSON.stringify(doc);
+        request.put({
+            uri: this.uri + '/' + id,
+            body: doc
+        }, function(err, res) {
+            remaining--;
+            if (err) return callback(err);
+            if (!remaining) return callback(err, res);
         });
-    });
+    }.bind(this);
+
+    files.forEach(function(file) {
+        if (_(file).isString()) {
+            fs.readFile(file, 'utf8', function(err, data) {
+                if (err) return callback(err);
+                var id = data.match(/.*"_id".*?:.*?"(.*?)".*/)[1];
+                put(id, data);
+            });
+        } else {
+            put(file._id, file);
+        }
+    }.bind(this));
 };
