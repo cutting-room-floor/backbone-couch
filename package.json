@@ -1,26 +1,27 @@
 {
-  "author": "",
-  "name": "backbone-couch",
-  "description": "Backbone.js sync for CouchD",
-  "version": "v0.3.0",
-  "homepage": "https://github.com/developmentseed/backbone-couch",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/developmentseed/backbone-couch.git"
-  },
-  "directories": {
-    "lib": "."
-  },
-  "engines": {
-    "node": "*"
-  },
-  "dependencies": {
-    "request": "https://github.com/mikeal/request/tarball/8bb7f98ba8b78c217552c979811c07f1299318fe",
-    "backbone": "= 0.3.3",
-    "underscore": "= 1.1.5"
-  },
-  "scripts": {
-      "test": "expresso"
-  },
-  "devDependencies": {}
+    "name": "backbone-couch",
+    "description": "Backbone.js sync for CouchDB",
+    "author": {
+      "name": "Development Seed",
+      "url": "http://developmentseed.org/",
+      "email": "info@developmentseed.org"
+    },
+    "version": "0.3.0",
+    "homepage": "https://github.com/developmentseed/backbone-couch",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/developmentseed/backbone-couch.git"
+    },
+    "main": "./backbone-couch",
+    "engines": {
+        "node": "*"
+    },
+    "dependencies": {
+        "request": "1.9.x",
+        "backbone": "= 0.3.3",
+        "underscore": "1.1.x"
+    },
+    "scripts": {
+        "test": "expresso"
+    }
 }
