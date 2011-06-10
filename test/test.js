@@ -20,12 +20,12 @@ exports['install'] = function() {
     var db = couch.db;
     couch.install(function(err) {
         assert.isNull(err);
-        db.get('_design/base', function(err, doc) {
+        db.get('_design/backbone', function(err, doc) {
             assert.isNull(err);
             assert.isDefined(doc);
             db.dbDel(function(err, res) {
                 assert.isNull(err);
-                db.get('_design/base', function(err, doc) {
+                db.get('_design/backbone', function(err, doc) {
                     assert.eql(err.error, 'not_found');
                 });
             });

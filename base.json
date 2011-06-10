@@ -1,11 +1,47 @@
 {
-    "_id":"_design/base",
+    "_id":"_design/backbone",
     "language":"javascript",
-    "views":{
-        "all": {
-            "map": "function(doc) {
-                emit(null, doc._id);
-            }"
+    "views": {
+        "collection": {
+            "map": "function(doc) { var key = doc._id.split('/').slice(1); emit(key, doc._id); }"
         }
-    }
+    },
+    "rewrites": [
+        {
+            "from": "/:a/:b/:c/:d",
+            "to": "_view/collection",
+            "query": {
+                "startkey": [":a", ":b", ":c", ":d"],
+                "endkey": [":a", ":b", ":c", ":d", {}],
+                "include_docs": true
+            }
+        },
+        {
+            "from": "/:a/:b/:c",
+            "to": "_view/collection",
+            "query": {
+                "startkey": [":a", ":b", ":c"],
+                "endkey": [":a", ":b", ":c", {}],
+                "include_docs": true
+            }
+        },
+        {
+            "from": "/:a/:b",
+            "to": "_view/collection",
+            "query": {
+                "startkey": [":a", ":b"],
+                "endkey": [":a", ":b", {}],
+                "include_docs": true
+            }
+        },
+        {
+            "from": "/:a",
+            "to": "_view/collection",
+            "query": {
+                "startkey": [":a"],
+                "endkey": [":a", {}],
+                "include_docs": true
+            }
+        }
+    ]
 }

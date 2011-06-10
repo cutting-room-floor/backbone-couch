@@ -1,6 +1,6 @@
 // Provides a `Backbone.sync` or `Model.sync` method for the server-side
 // context. Uses CouchDB for model persistence.
-var _ = require('underscore')._,
+var _ = require('underscore'),
     Backbone = require('backbone'),
     Couch = require('./couch');
 
@@ -23,13 +23,20 @@ module.exports = function(config) {
     // DBs.
     // TODO: 1) find out why delay is necessary. 2) make install() only install
     // and have API users explicitly destroy a DB before installing it.
-    var install = function(callback) {
+    var install = function(options, callback) {
+        if (_(options).isFunction()) {
+            callback = options;
+            options = {};
+        }
+        options = _(options || {}).defaults({
+            doc: __dirname + '/base.json'
+        });
         db.dbDel(function(err) {
             if (err && err.reason != 'missing') return callback(err);
             setTimeout(function() {
                 db.dbPut(function(err) {
                     if (err) return callback(err);
-                    db.putDesignDocs([__dirname + '/base.json'], callback);
+                    db.putDesignDocs([options.doc], callback);
                 });
             }, 100);
         });
@@ -51,10 +58,8 @@ module.exports = function(config) {
                     err ? error(new Error('No results')) : success(doc);
                 });
             } else {
-                db.view('_design/base/_view/all', {
-                    limit: 10,
-                    include_docs: true
-                }, function(err, res) {
+                var url = '_design/backbone/_rewrite' + getUrl(model);
+                db.view(url, {}, function(err, res) {
                     if (err) return error(err);
                     data = [];
                     _.each(res.rows, function(val) {
