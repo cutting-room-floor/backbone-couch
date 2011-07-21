@@ -6,7 +6,9 @@ Couch = module.exports = function(config) {
     var host = config.host || '127.0.0.1';
     var port = config.port || '5984';
     if (!config.name) throw 'Database name is required';
+    var credentials = config.auth ? config.auth.username + ":" + config.auth.password + "@" : '';
     this.uri = 'http://' +
+        credentials +
         host + ':' +
         port + '/' +
         config.name;
