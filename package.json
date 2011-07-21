@@ -18,7 +18,7 @@
     },
     "dependencies": {
         "request": "1.9.x",
-        "backbone": "= 0.3.3",
+        "backbone": "= 0.5.1",
         "underscore": "1.1.x"
     },
     "scripts": {
