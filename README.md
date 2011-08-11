@@ -15,7 +15,7 @@ server-side use of Backbone like in
 
     // Create a new backbone-couch handler for a database 'documents'.
     var couch = require('backbone-couch')({
-        host: 'http://127.0.0.1/',
+        host: '127.0.0.1',
         port: '5984',
         name: 'documents'
     });
