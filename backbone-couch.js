@@ -70,10 +70,16 @@ module.exports = function(config) {
             // and merging its attributes.
             db.get(getUrl(model), function(err, doc) {
                 if (err) doc = {};
-                db.put(_(doc).extend(toJSON(model)), function(err, res) {
-                    if (err) return error(err);
-                    success({'_rev': res.rev});
-                });
+                if (doc._rev && !model.get('_rev')) {
+                    error(new Error('_rev required for update'));
+                } else if (doc._rev !== model.get('_rev')) {
+                    error(new Error.HTTP('Document update conflict', 409));
+                } else {
+                    db.put(_(doc).extend(toJSON(model)), function(err, res) {
+                        if (err) return error(err);
+                        success({'_rev': res.rev});
+                    });
+                }
             });
             break;
         case 'delete':
