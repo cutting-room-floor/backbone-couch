@@ -13,7 +13,7 @@
             "query": {
                 "startkey": [":a", ":b", ":c", ":d"],
                 "endkey": [":a", ":b", ":c", ":d", {}],
-                "include_docs": true
+                "include_docs": "true"
             }
         },
         {
@@ -22,7 +22,7 @@
             "query": {
                 "startkey": [":a", ":b", ":c"],
                 "endkey": [":a", ":b", ":c", {}],
-                "include_docs": true
+                "include_docs": "true"
             }
         },
         {
@@ -31,7 +31,7 @@
             "query": {
                 "startkey": [":a", ":b"],
                 "endkey": [":a", ":b", {}],
-                "include_docs": true
+                "include_docs": "true"
             }
         },
         {
@@ -40,7 +40,7 @@
             "query": {
                 "startkey": [":a"],
                 "endkey": [":a", {}],
-                "include_docs": true
+                "include_docs": "true"
             }
         }
     ]
