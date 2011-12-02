@@ -74,7 +74,7 @@ module.exports = function(config) {
                         var err = new Error('Document update conflict.');
                         err.reason = 'Document update conflict.';
                         err.statusCode = 409;
-                        error(error);
+                        error(err);
                     } else {
                         db.put(_(doc).extend(toJSON(model)), function(err, res) {
                             if (err) return error(err);
