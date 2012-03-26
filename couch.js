@@ -2,7 +2,7 @@ var _ = require('underscore'),
     fs = require('fs'),
     request = require('request');
 
-Couch = module.exports = function(config) {
+var Couch = module.exports = function(config) {
     var host = config.host || '127.0.0.1';
     var port = config.port || '5984';
     if (!config.name) throw 'Database name is required';
