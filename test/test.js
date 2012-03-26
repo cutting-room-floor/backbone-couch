@@ -139,9 +139,9 @@ exports['custom'] = function() {
                 "from": "/api/Number",
                 "to": "_view/custom",
                 "query": {
-                    "limit": 2,
-                    "descending": true,
-                    "include_docs": true
+                    "limit": "2",
+                    "descending": "true",
+                    "include_docs": "true"
                 }
             }
         ]
