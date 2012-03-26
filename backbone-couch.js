@@ -53,7 +53,7 @@ module.exports = function(config) {
                 var url = '_design/backbone/_rewrite' + getUrl(model);
                 db.view(url, {}, function(err, res) {
                     if (err) return error(err);
-                    data = [];
+                    var data = [];
                     _.each(res.rows, function(val) {
                         data.push(val.doc);
                     });
