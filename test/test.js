@@ -16,7 +16,7 @@ var error = function(db) {
 // Install and destroy database.
 // -----------------------------
 exports['install'] = function() {
-    var couch = require('backbone-couch')({name: 'backbone_couch_test_install'});
+    var couch = require('../backbone-couch')({name: 'backbone_couch_test_install'});
     var db = couch.db;
     couch.install(function(err) {
         assert.isNull(err);
@@ -36,7 +36,7 @@ exports['install'] = function() {
 // Create db, save documents, load documents, destroy documents, destroy db.
 // -------------------------------------------------------------------------
 exports['save'] = function() {
-    var couch = require('backbone-couch')({name: 'backbone_couch_test_save'});
+    var couch = require('../backbone-couch')({name: 'backbone_couch_test_save'});
     var db = couch.db;
     TestNumber.prototype.sync = couch.sync;
     couch.install(function(err) {
@@ -76,7 +76,7 @@ exports['save'] = function() {
 // Use a view to load a collection.
 // --------------------------------
 exports['view'] = function() {
-    var couch = require('backbone-couch')({name: 'backbone_couch_test_view'});
+    var couch = require('../backbone-couch')({name: 'backbone_couch_test_view'});
     var db = couch.db;
     // Exend TestNumber to not interfere with concurrently running save test.
     var ViewNumber = TestNumber.extend({});
@@ -118,7 +118,7 @@ exports['view'] = function() {
 // Test custom design docs
 // -----------------------
 exports['custom'] = function() {
-    var couch = require('backbone-couch')({name: 'backbone_couch_test_custom'});
+    var couch = require('../backbone-couch')({name: 'backbone_couch_test_custom'});
     var db = couch.db;
     var ViewNumber = TestNumber.extend({});
     var ViewNumbers = TestNumbers.extend({
