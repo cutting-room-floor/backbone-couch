@@ -79,8 +79,8 @@ respond to this path:
                 "from": "/blog/recent",
                 "to": "_view/recent",
                 "query": {
-                    "limit": 10
-                    "include_docs": true
+                    "limit": "10"
+                    "include_docs": "true"
                 }
             }
         ]
