@@ -6,7 +6,7 @@
         "url": "http://developmentseed.org/",
         "email": "info@developmentseed.org"
     },
-    "version": "0.5.2",
+    "version": "0.5.3",
     "homepage": "https://github.com/developmentseed/backbone-couch",
     "repository": {
         "type": "git",
