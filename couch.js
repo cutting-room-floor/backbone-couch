@@ -20,7 +20,7 @@ var Couch = module.exports = function(config) {
 Couch.prototype.parse = function(callback) {
     var that = this;
     return function(err, res, body) {
-        body = body ? JSON.parse(body) : {};
+        body = (typeof body === 'string' ? JSON.parse(body) : body) || {};
         if (!err) {
             if (body.error) {
                 err = new Error(body.reason);

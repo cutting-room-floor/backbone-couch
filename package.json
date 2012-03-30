@@ -17,11 +17,14 @@
         "node": "*"
     },
     "dependencies": {
-        "request": "1.9.x",
+        "request": "2.9.x",
         "backbone": "= 0.5.1",
         "underscore": "1.1.x"
     },
+    "devDependencies": {
+        "mocha": "1.0.x"
+    },
     "scripts": {
-        "test": "expresso"
+        "test": "mocha -R spec"
     }
 }

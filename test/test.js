@@ -1,174 +1,29 @@
-var assert = require('assert'),
-    Backbone = require('backbone'),
-    _ = require('underscore')._;
+var BackboneCouch = require('..');
+var assert = require('assert');
+var Backbone = require('backbone');
+var _ = require('underscore')._;
 
-// Global fatal error handler.
-// ---------------------------
-var error = function(db) {
-    return function(result, error) {
-        console.error(new Error(error).stack);
-        db.dbDel(function() {
-            process.exit(0);
-        });
+function cleanup(done) {
+    this.dbDel(function(err) {
+        done();
+    });
+}
+
+var data = [
+    {
+        'id': 'one',
+        'name': 'One - 1',
+    },
+    {
+        'id': 'two',
+        'name': 'Two - 2'
+    },
+    {
+        'id': 'three',
+        'name': 'Three - 3'
     }
-};
+];
 
-// Install and destroy database.
-// -----------------------------
-exports['install'] = function() {
-    var couch = require('../backbone-couch')({name: 'backbone_couch_test_install'});
-    var db = couch.db;
-    couch.install(function(err) {
-        assert.isNull(err);
-        db.get('_design/backbone', function(err, doc) {
-            assert.isNull(err);
-            assert.isDefined(doc);
-            db.dbDel(function(err, res) {
-                assert.isNull(err);
-                db.get('_design/backbone', function(err, doc) {
-                    assert.eql(err.error, 'not_found');
-                });
-            });
-        })
-    });
-};
-
-// Create db, save documents, load documents, destroy documents, destroy db.
-// -------------------------------------------------------------------------
-exports['save'] = function() {
-    var couch = require('../backbone-couch')({name: 'backbone_couch_test_save'});
-    var db = couch.db;
-    TestNumber.prototype.sync = couch.sync;
-    couch.install(function(err) {
-        var models = [];
-        var destroyed = 0;
-        var destroy = function(model) {
-            model.destroy({
-                success: function() {
-                    destroyed++;
-                    if (destroyed == data.length) {
-                        db.dbDel();
-                    }
-                },
-                error: error(db)
-            });
-        };
-        var reload = function(model) {
-            assert.isDefined(model.get('_rev'));
-            var rev = model.get('_rev');
-            (new TestNumber({id: model.id})).fetch({
-                success: function(model) {
-                    assert.eql(model.get('_rev'), rev);
-                    destroy(model);
-                },
-                error: error(db)
-            });
-        };
-        _.each(data, function(d) {
-            models.push((new TestNumber()).save(d, {
-                success: reload,
-                error: error(db)
-            }));
-        });
-    });
-};
-
-// Use a view to load a collection.
-// --------------------------------
-exports['view'] = function() {
-    var couch = require('../backbone-couch')({name: 'backbone_couch_test_view'});
-    var db = couch.db;
-    // Exend TestNumber to not interfere with concurrently running save test.
-    var ViewNumber = TestNumber.extend({});
-    var ViewNumbers = TestNumbers.extend({
-        model: ViewNumber
-    });
-    ViewNumber.prototype.sync = couch.sync;
-    ViewNumbers.prototype.sync = couch.sync;
-    couch.install(function(err) {
-        var models = [];
-        var saved = 0;
-        var loadAll = function() {
-            saved++;
-            if (saved == data.length) {
-                (new ViewNumbers()).fetch({
-                    success: function(collection) {
-                        var names = collection.map(function(model) {
-                            return model.get('name');
-                        });
-                        _.each(data, function(d) {
-                            assert.eql(true, names.indexOf(d.name) != -1);
-                        });
-                        db.dbDel();
-                    },
-                    error: error(db)
-                })
-            }
-        };
-        _.each(data, function(d) {
-            models.push((new ViewNumber()).save(d, {
-                success: loadAll,
-                error: error(db)
-            }));
-        });
-    });
-};
-
-
-// Test custom design docs
-// -----------------------
-exports['custom'] = function() {
-    var couch = require('../backbone-couch')({name: 'backbone_couch_test_custom'});
-    var db = couch.db;
-    var ViewNumber = TestNumber.extend({});
-    var ViewNumbers = TestNumbers.extend({
-        model: ViewNumber
-    });
-    ViewNumber.prototype.sync = couch.sync;
-    ViewNumbers.prototype.sync = couch.sync;
-    couch.install({ doc: {
-        "_id":"_design/backbone",
-        "language":"javascript",
-        "views": {
-            "custom": {
-                "map": "function(doc) { emit(doc._id, doc._id); }"
-            }
-        },
-        "rewrites": [
-            {
-                "from": "/api/Number",
-                "to": "_view/custom",
-                "query": {
-                    "limit": "2",
-                    "descending": "true",
-                    "include_docs": "true"
-                }
-            }
-        ]
-    }}, function(err) {
-        assert.isNull(err);
-        var remaining = data.length;
-        var view = function() {
-            remaining--;
-            if (remaining) return;
-            (new ViewNumbers()).fetch({
-                success: function(collection) {
-                    assert.equal(collection.length, 2);
-                    assert.equal(collection.at(0).id, 'two');
-                    assert.equal(collection.at(1).id, 'three');
-                    db.dbDel();
-                },
-                error: error(db)
-            });
-        };
-        data.forEach(function(d) {
-            (new ViewNumber()).save(d, {
-                success: view,
-                error: error(db)
-            });
-        });
-    });
-};
 
 var TestNumber = Backbone.Model.extend({
     url: function() {
@@ -181,15 +36,199 @@ var TestNumbers = Backbone.Collection.extend({
     url: '/api/Number'
 });
 
-var data = [{
-    'id': 'one',
-    'name': 'One - 1',
-},
-{
-    'id': 'two',
-    'name': 'Two - 2'
-},
-{
-    'id': 'three',
-    'name': 'Three - 3'
-}];
+
+// Install and destroy database.
+// -----------------------------
+describe('install', function() {
+    var couch = BackboneCouch({name: 'backbone_couch_test_install'});
+    var db = couch.db;
+
+    before(cleanup.bind(db));
+    after(cleanup.bind(db));
+
+    it('should install the database', function(done) {
+        couch.install(done);
+    });
+
+    it('check that database exists', function(done) {
+        db.get('_design/backbone', function(err, doc) {
+            if (err) throw err;
+            assert.ok(doc._rev);
+            assert.ok(doc.language);
+            assert.ok(doc.views);
+            assert.ok(doc.rewrites);
+            done();
+        });
+    });
+
+    it('should delete the database', function(done) {
+        db.dbDel(done);
+    });
+
+    it('check that database does not exist anymore', function(done) {
+        db.get('_design/backbone', function(err, doc) {
+            assert.deepEqual(err.error, 'not_found');
+            done();
+        });
+    });
+});
+
+// Create db, save documents, load documents, destroy documents, destroy db.
+// -------------------------------------------------------------------------
+describe('save', function() {
+
+    var couch = BackboneCouch({name: 'backbone_couch_test_save'});
+    var db = couch.db;
+    TestNumber.prototype.sync = couch.sync;
+
+    before(cleanup.bind(db));
+
+    it('should install the database', function(done) {
+        couch.install(done);
+    });
+
+    _.each(data, function(d) {
+        var model, rev;
+
+        it('should save ' + d.id, function(done) {
+            new TestNumber().save(d, {
+                success: function(m) {
+                    model = m;
+                    rev = model.get('_rev');
+                    assert.ok(rev);
+                    done();
+                },
+                error: function(err) { throw err; }
+            });
+        });
+
+        it('should load ' + d.id, function(done) {
+            new TestNumber({ id: d.id }).fetch({
+                success: function(model) {
+                    assert.equal(model.get('_rev'), rev);
+                    done();
+                },
+                error: function(err) { throw err; }
+            });
+        });
+
+        it('should destroy ' + d.id, function(done) {
+            model.destroy({
+                success: function() { done() },
+                error: function(err) { throw err; }
+            });
+        })
+    });
+
+    after(cleanup.bind(db));
+});
+
+// Use a view to load a collection.
+// --------------------------------
+describe('view', function() {
+    var couch = BackboneCouch({name: 'backbone_couch_test_view'});
+    var db = couch.db;
+
+    before(cleanup.bind(db));
+
+    // Extend TestNumber to not interfere with concurrently running save test.
+    var ViewNumber = TestNumber.extend({});
+    var ViewNumbers = TestNumbers.extend({
+        model: ViewNumber
+    });
+    ViewNumber.prototype.sync = couch.sync;
+    ViewNumbers.prototype.sync = couch.sync;
+
+    it('should install the database', function(done) {
+        couch.install(done);
+    });
+
+    _.each(data, function(d) {
+        it('should save ' + d.id, function(done) {
+            new ViewNumber().save(d, {
+                success: function() { done(); },
+                error: function(err) { throw err; }
+            });
+        });
+    });
+
+    it('should return all data in the view', function(done) {
+        new ViewNumbers().fetch({
+            success: function(collection) {
+                var names = collection.map(function(model) {
+                    return model.get('name');
+                });
+                _.each(data, function(d) {
+                    assert.equal(true, names.indexOf(d.name) != -1);
+                });
+                done();
+            },
+            error: function(err) { throw err; }
+        });
+    });
+
+    after(cleanup.bind(db));
+});
+
+
+// Test custom design docs
+// -----------------------
+describe('custom', function() {
+    var couch = BackboneCouch({name: 'backbone_couch_test_custom'});
+    var db = couch.db;
+
+    before(cleanup.bind(db));
+
+    var ViewNumber = TestNumber.extend({});
+    var ViewNumbers = TestNumbers.extend({
+        model: ViewNumber
+    });
+    ViewNumber.prototype.sync = couch.sync;
+    ViewNumbers.prototype.sync = couch.sync;
+
+    it('should install the database', function(done) {
+       couch.install({ doc: {
+            "_id":"_design/backbone",
+            "language":"javascript",
+            "views": {
+                "custom": {
+                    "map": "function(doc) { emit(doc._id, doc._id); }"
+                }
+            },
+            "rewrites": [
+                {
+                    "from": "/api/Number",
+                    "to": "_view/custom",
+                    "query": {
+                        "limit": "2",
+                        "descending": "true",
+                        "include_docs": "true"
+                    }
+                }
+            ]
+        }}, done);
+    });
+
+    _.each(data, function(d) {
+        it('should save ' + d.id, function(done) {
+            new ViewNumber().save(d, {
+                success: function() { done(); },
+                error: function(err) { throw err; }
+            });
+        });
+    });
+
+    it('should return the correct amount of docs', function(done) {
+        (new ViewNumbers()).fetch({
+            success: function(collection) {
+                assert.equal(collection.length, 2);
+                assert.equal(collection.at(0).id, 'two');
+                assert.equal(collection.at(1).id, 'three');
+                done();
+            },
+            error: function(err) { throw err; }
+        });
+    });
+
+    after(cleanup.bind(db));
+});
