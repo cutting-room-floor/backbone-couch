@@ -92,8 +92,6 @@ for more info on design doc rewrites.
 
 ### Run tests
 
-Requires [Expresso](http://visionmedia.github.com/expresso/). Tested with version 0.7.6.
-
     cd backbone-couch/
     npm test
 
