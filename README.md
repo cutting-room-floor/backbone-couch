@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/developmentseed/backbone-couch.png)](http://travis-ci.org/developmentseed/backbone-couch)
 Backbone Couch
 --------------
 Overrides for [Backbone](http://documentcloud.github.com/backbone/) to use
