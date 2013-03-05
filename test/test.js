@@ -2,6 +2,7 @@ var BackboneCouch = require('..');
 var assert = require('assert');
 var Backbone = require('backbone');
 var _ = require('underscore')._;
+var url = require('url');
 
 function cleanup(done) {
     this.dbDel(function(err) {
@@ -231,4 +232,50 @@ describe('custom', function() {
     });
 
     after(cleanup.bind(db));
+});
+
+// Test configuration options.
+// ---------------------------
+describe('configure', function() {
+    it('should use https and port 6984', function(done) {
+        var couch = BackboneCouch({
+            secure: true,
+            name: 'backbone_couch_test_config'}
+        );
+        var db = couch.db;
+        var parts = url.parse(couch.db.uri);
+
+        assert.equal(parts.protocol, 'https:');
+        assert.equal(parts.port, '6984');
+        db.dbDel();
+        done();
+    });
+
+    it('should use https and custom port', function(done) {
+        var couch = BackboneCouch({
+            secure: true,
+            port: '7984',
+            name: 'backbone_couch_test_config'}
+        );
+        var db = couch.db;
+        var parts = url.parse(couch.db.uri);
+
+        assert.equal(parts.protocol, 'https:');
+        assert.equal(parts.port, '7984');
+        db.dbDel();
+        done();
+    });
+
+    it('should use default options', function(done) {
+        var couch = BackboneCouch({
+            name: 'backbone_couch_test_config'}
+        );
+        var db = couch.db;
+        var parts = url.parse(couch.db.uri);
+
+        assert.equal(parts.protocol, 'http:');
+        assert.equal(parts.port, '5984');
+        db.dbDel();
+        done();
+    });
 });
