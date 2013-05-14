@@ -100,9 +100,10 @@ module.exports = function(config) {
             // with a HEAD request to CouchDB.
             db.head(getUrl(model), function(err, doc) {
                 if (err) return error(err);
-                model.set({'_rev': doc._rev}, {silent: true});
-                db.del(toJSON(model), function(err, res) {
-                    err ? error(err) : success(res);
+                var attr = toJSON(model);
+                attr._rev = doc._rev;
+                db.del(attr, function(err, res) {
+                    err ? error(err) : success({});
                 })
             });
             break;
