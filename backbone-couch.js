@@ -47,7 +47,7 @@ module.exports = function(config) {
         case 'read':
             if (model.id) {
                 db.get(getUrl(model), function(err, doc) {
-                    err ? error(new Error('No results')) : success(doc);
+                    err ? error(err) : success(doc);
                 });
             } else {
                 var url = '_design/backbone/_rewrite' + getUrl(model);
