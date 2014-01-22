@@ -1,6 +1,7 @@
 var _ = require('underscore'),
     fs = require('fs'),
-    request = require('request');
+    request = require('request'),
+    qs = require('querystring');
 
 var Couch = module.exports = function(config) {
     var host = config.host || '127.0.0.1';
@@ -13,6 +14,8 @@ var Couch = module.exports = function(config) {
         port + '/' +
         config.name;
     this.name = config.name;
+    this.readOpts = config.readOpts;
+    this.writeOpts = config.writeOpts;
 };
 
 // General response parser
@@ -39,7 +42,7 @@ Couch.prototype.parse = function(callback) {
 // -----------------------
 Couch.prototype.put = function(doc, callback) {
     request.put({
-        uri: this.uri + '/' + encodeURIComponent(doc._id),
+        uri: this.uri + '/' + encodeURIComponent(doc._id) + (this.writeOpts ? ('?' + qs.stringify(this.writeOpts)) : ''),
         json: doc
     }, this.parse(callback));
 };
@@ -48,7 +51,7 @@ Couch.prototype.put = function(doc, callback) {
 // ------------------------
 Couch.prototype.post = function(doc, callback) {
     request.post({
-        uri: this.uri,
+        uri: this.uri + (this.writeOpts ? ('?' + qs.stringify(this.writeOpts)) : ''),
         json: doc
     }, this.parse(callback));
 };
@@ -65,7 +68,7 @@ Couch.prototype.del = function(doc, callback) {
 // -------------------------
 Couch.prototype.get = function(id, callback) {
     request.get({
-        uri: this.uri + '/' + encodeURIComponent(id)
+        uri: this.uri + '/' + encodeURIComponent(id) + (this.readOpts ? ('?' + qs.stringify(this.readOpts)) : '')
     }, this.parse(callback));
 };
 
@@ -73,7 +76,7 @@ Couch.prototype.get = function(id, callback) {
 // ---------------------------------------
 Couch.prototype.head = function(id, callback) {
     request.head({
-        uri: this.uri + '/' + encodeURIComponent(id)
+        uri: this.uri + '/' + encodeURIComponent(id) + (this.readOpts ? ('?' + qs.stringify(this.readOpts)) : '')
     }, this.parse(function(err, body) {
         body && !err && (body._id = id);
         callback(err, body);
@@ -83,12 +86,8 @@ Couch.prototype.head = function(id, callback) {
 // GET documents via view from Couch
 // ---------------------------------
 Couch.prototype.view = function(view, options, callback) {
-    var opts = [];
-    _.each(options, function(v, k) {
-        opts.push(encodeURIComponent(k) + '=' + encodeURIComponent(v));
-    });
     request.get({
-        uri: this.uri + '/' + view + '/?' + opts.join('&')
+        uri: this.uri + '/' + view + '/?' + qs.stringify(_(options).defaults(this.readOpts))
     }, this.parse(callback));
 };
 
