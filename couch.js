@@ -73,7 +73,8 @@ Couch.prototype.get = function(id, callback) {
 // ---------------------------------------
 Couch.prototype.head = function(id, callback) {
     request.head({
-        uri: this.uri + '/' + encodeURIComponent(id)
+        uri: this.uri + '/' + encodeURIComponent(id),
+        json: true
     }, this.parse(function(err, body) {
         body && !err && (body._id = id);
         callback(err, body);
