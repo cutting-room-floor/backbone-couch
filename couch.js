@@ -13,8 +13,9 @@ var Couch = module.exports = function(config) {
         port + '/' +
         config.name;
     this.name = config.name;
-    if (config.strictSSL === false) request.defaults({ strictSSL: false });
 };
+
+module.exports.request = request;
 
 // General response parser
 // -----------------------
