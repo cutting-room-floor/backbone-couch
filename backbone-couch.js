@@ -113,6 +113,7 @@ module.exports = function(config) {
     return {
         db: db,
         install: install,
-        sync: sync
+        sync: sync,
+        request: Couch.request
     };
 };

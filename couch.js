@@ -15,6 +15,8 @@ var Couch = module.exports = function(config) {
     this.name = config.name;
 };
 
+module.exports.request = request;
+
 // General response parser
 // -----------------------
 Couch.prototype.parse = function(callback) {
