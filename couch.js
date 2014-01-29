@@ -2,6 +2,10 @@ var _ = require('underscore'),
     fs = require('fs'),
     request = require('request');
 
+request.defaults({
+    strictSSL: false
+});
+
 var Couch = module.exports = function(config) {
     var host = config.host || '127.0.0.1';
     var port = config.port || (config.secure ? '6984' : '5984');
